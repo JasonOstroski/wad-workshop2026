@@ -1,0 +1,64 @@
+services:
+  shop:
+    image: node:22-alpine
+    command: ["node", "/workshop/server.js"]
+    ports:
+      - "8088:8088"
+    environment:
+      PORT: 8088
+      POSTGREST_URL: http://postgrest:3000
+      PAYMENT_URL: http://payment:4004
+    volumes:
+      - ./:/workshop:ro
+    depends_on:
+      postgrest:
+        condition: service_healthy
+      payment:
+        condition: service_healthy
+
+  payment:
+    image: node:22-alpine
+    command: ["node", "/workshop/payment.js"]
+    environment:
+      PORT: 4004
+    volumes:
+      - ./:/workshop:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4004/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  postgresql:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+    volumes:
+      - workshop-db:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  postgrest:
+    image: postgrest/postgrest:v12.2.12
+    environment:
+      PGRST_DB_URI: postgres://shop:shop@postgresql:5432/shop
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: web_anon
+      PGRST_JWT_SECRET: workshop-only-secret
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  workshop-db:

@@ -1,0 +1,1 @@
+{"name":"workshop-shop","private":true,"scripts":{"start":"node server.js","payment":"node payment.js"}}
