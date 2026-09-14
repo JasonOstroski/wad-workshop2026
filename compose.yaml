@@ -1,6 +1,6 @@
 services:
   shop:
-    image: node:22-alpine
+    image: docker.io/library/node:22-alpine
     command: ["node", "/workshop/server.js"]
     ports:
       - "8088:8088"
@@ -17,7 +17,7 @@ services:
         condition: service_healthy
 
   payment:
-    image: node:22-alpine
+    image: docker.io/library/node:22-alpine
     command: ["node", "/workshop/payment.js"]
     environment:
       PORT: 4004
@@ -30,7 +30,7 @@ services:
       retries: 20
 
   postgresql:
-    image: postgres:17-alpine
+    image: docker.io/library/postgres:17-alpine
     environment:
       POSTGRES_DB: shop
       POSTGRES_USER: shop
@@ -45,7 +45,7 @@ services:
       retries: 20
 
   postgrest:
-    image: postgrest/postgrest:v12.2.12
+    image: docker.io/postgrest/postgrest:v12.2.12
     environment:
       PGRST_DB_URI: postgres://shop:shop@postgresql:5432/shop
       PGRST_DB_SCHEMAS: public
@@ -55,7 +55,7 @@ services:
       postgresql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      test: ["CMD-SHELL", "pgrep postgrest >/dev/null"]
       interval: 5s
       timeout: 3s
       retries: 20
