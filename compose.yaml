@@ -60,5 +60,19 @@ services:
       timeout: 3s
       retries: 20
 
+  load-generator:
+    image: docker.io/grafana/k6:0.55.0
+    profiles: [loadgen]
+    command: ["run", "/scripts/smoke.js"]
+    environment:
+      TARGET_URL: http://shop:8088
+      VUS: 10
+      DURATION: 60s
+    volumes:
+      - ./loadgen/smoke.js:/scripts/smoke.js:ro
+    depends_on:
+      shop:
+        condition: service_started
+
 volumes:
   workshop-db:
