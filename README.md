@@ -50,6 +50,10 @@ multi-item cart, and checkout traffic for 60 seconds. With Podman Compose, use
 the equivalent `--profile loadgen` command and the Podman image path configured
 by your local setup.
 
+When running a workshop problem scenario, use this generated traffic to trigger
+the issue under concurrent load and inspect its effects in your observability
+backend.
+
 Edit `frontend/index.html`, `frontend/app.js`, or `frontend/styles.css`, then refresh the browser. Edit `server.js` or `payment.js`, then restart only the relevant Node container.
 
 PostgreSQL is initialized from `db/init.sql`. Reset it with `docker compose down -v`. The payment service approves every non-zero charge and is intentionally for teaching only.
